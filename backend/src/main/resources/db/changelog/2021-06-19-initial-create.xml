@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd
+      http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.2.xsd"
+        logicalFilePath="2021-06-19-initial-create.xml">
+
+    <changeSet id="2021-06-19-initial-create-01" author="isegodin">
+
+        <createTable tableName="tag">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="author">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="book">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="id_author" type="bigint">
+                <constraints foreignKeyName="fk_book_id_author" referencedTableName="author" referencedColumnNames="id"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="book_tag">
+            <column name="id_book" type="bigint">
+                <constraints foreignKeyName="fk_book_id" referencedTableName="book" referencedColumnNames="id"/>
+            </column>
+            <column name="id_tag" type="bigint">
+                <constraints foreignKeyName="fk_tag_id" referencedTableName="tag" referencedColumnNames="id"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="book_tag" columnNames="id_book, id_tag"/>
+
+    </changeSet>
+</databaseChangeLog>
