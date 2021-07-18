@@ -7,8 +7,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>backend</module>
         <module>frontend</module>
+        <module>backend</module>
     </modules>
 
     <parent>

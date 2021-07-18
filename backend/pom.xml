@@ -12,6 +12,8 @@
     <artifactId>backend</artifactId>
 
     <properties>
+        <path-to-public-resources>src/main/resources/public</path-to-public-resources>
+
         <postgresql-embedded.version>0.13.4</postgresql-embedded.version>
         <embedded-database-spring-test.version>2.0.1</embedded-database-spring-test.version>
         <embedded-postgres.version>1.3.0</embedded-postgres.version>
@@ -36,10 +38,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-security</artifactId>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
@@ -135,6 +137,33 @@
             </plugin>
 
             <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>Clean public folder before copy resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <directory>${path-to-public-resources}</directory>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>Clean public folder on clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <directory>${path-to-public-resources}</directory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
@@ -144,7 +173,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>src/main/resources/public</outputDirectory>
+                            <outputDirectory>${path-to-public-resources}</outputDirectory>
                             <overwrite>true</overwrite>
                             <resources>
                                 <resource>
@@ -153,6 +182,7 @@
                                         <include>static/</include>
                                         <include>index.html</include>
                                         <include>favicon.ico</include>
+                                        <include>logo.svg</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -163,7 +193,6 @@
 
         </plugins>
     </build>
-
 
 
 </project>

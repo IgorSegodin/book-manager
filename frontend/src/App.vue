@@ -1,16 +1,16 @@
 <script>
-import GameView from "@/components/GameView";
+import TempView from "@/components/TempView";
 
 export default {
   name: 'App',
   components: {
-    GameView
+    TempView
   }
 }
 </script>
 
 <template>
-  <GameView/>
+  <TempView/>
 </template>
 
 <style>
