@@ -13,16 +13,27 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 /**
+ * Mutates request url in a way, that is compatible with SPA router.
+ * <p>
+ * Only paths, which contains '/spa/' will be affected.
+ * <p>
+ * All router links (without extension) will return same 'index.html' page.
+ * <p>
+ * Links, which contain extension, will be handled by static resource handler.
+ *
  * @author isegodin
  */
 @Configuration
 @RequiredArgsConstructor
 public class SpaWebFilter implements WebFilter {
+
+    private static final String SPA_PATH = "/spa";
 
     private final WebFluxProperties webFluxProperties;
 
@@ -37,57 +48,62 @@ public class SpaWebFilter implements WebFilter {
 
         String fullPath = request.getPath().value();
 
+        return Stream.of(
 
-//        Stream.of(
-//                (Function<String, Mono<Void>>)(path) -> {
-//                    if ( pathMatcher.match("/", fullPath)
-//                            || pathMatcher.match(basePath, fullPath)) {
-//                        ServerHttpResponse response = exchange.getResponse();
-//
-//                        response.setStatusCode(HttpStatus.TEMPORARY_REDIRECT);
-//                        response.getHeaders().setLocation(URI.create(
-//                                request.getPath().contextPath().value() +
-//                                        "/spa"
-//                        ));
-//
-//                        return response.setComplete();
-//                    }
-//                    return null;
-//                },
-//
-//                ()
-//        )
+                handleIndexPage(basePath, fullPath),
 
+                handleResource(basePath, fullPath),
 
-        if (
-                pathMatcher.match("/", fullPath)
-                        || pathMatcher.match(basePath, fullPath)
-        ) {
+                handleSpaPage(basePath, fullPath)
+
+        )
+                .filter(Objects::nonNull)
+                .findFirst()
+                .map(func -> func.apply(exchange, chain))
+                .orElseGet(() -> chain.filter(exchange));
+    }
+
+    private BiFunction<ServerWebExchange, WebFilterChain, Mono<Void>> handleIndexPage(String basePath, String fullPath) {
+        if (!pathMatcher.match("/", fullPath)
+                && !pathMatcher.match(basePath, fullPath)) {
+            return null;
+        }
+
+        return (exchange, chain) -> {
             ServerHttpResponse response = exchange.getResponse();
 
             response.setStatusCode(HttpStatus.TEMPORARY_REDIRECT);
             response.getHeaders().setLocation(URI.create(
-                    request.getPath().contextPath().value() +
-                            "/spa"
+                    exchange.getRequest().getPath().contextPath().value() +
+                            SPA_PATH
             ));
 
             return response.setComplete();
+        };
+    }
 
-        } else if (pathMatcher.match(basePath + "/spa/**/*.*", fullPath)) {
-            return mutateRequestPath(
-                    exchange,
-                    chain,
-                    fullPath.replace("/spa/", "/")
-            );
-        } else if (pathMatcher.match(basePath + "/spa/**", fullPath)) {
-            return mutateRequestPath(
-                    exchange,
-                    chain,
-                    basePath + "/"
-            );
-        } else {
-            return chain.filter(exchange);
+    private BiFunction<ServerWebExchange, WebFilterChain, Mono<Void>> handleResource(String basePath, String fullPath) {
+        if (!pathMatcher.match(basePath + SPA_PATH + "/**/*.*", fullPath)) {
+            return null;
         }
+
+        return (exchange, chain) -> mutateRequestPath(
+                exchange,
+                chain,
+                fullPath.replace(SPA_PATH + "/", "/")
+        );
+    }
+
+    private BiFunction<ServerWebExchange, WebFilterChain, Mono<Void>> handleSpaPage(String basePath, String fullPath) {
+        if (!pathMatcher.match(basePath + SPA_PATH + "/**", fullPath)) {
+            return null;
+        }
+
+        return (exchange, chain) -> mutateRequestPath(
+                exchange,
+                chain,
+                basePath + "/"
+        );
     }
 
     private Mono<Void> mutateRequestPath(ServerWebExchange exchange, WebFilterChain chain, String requestPath) {
