@@ -36,7 +36,15 @@
     },
     "rules": {
       "no-unused-vars": "warn",
-      "no-debugger": "warn"
+      "no-debugger": "warn",
+      "no-restricted-imports": [
+        "error",
+        {
+          "patterns": [
+            ".*"
+          ]
+        }
+      ]
     }
   },
   "browserslist": [
