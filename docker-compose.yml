@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  book-manager:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: book-manager
+    ports:
+      - "8080:8080"
+    environment:
+      - app.database.host=host.docker.internal

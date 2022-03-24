@@ -10,6 +10,12 @@
 * WebFlux
 * VueJS
 
+### Local start guide
+
+* Run PostgreSQL with `postgres_docker_run.sh`
+* Create database with `init_db.sh`
+* Build with docker compose `docer-compose build`
+* Start with docker compose `docker-compose up` (or `docker-compose up -d` for detached mode) 
 
 ---
 https://router.vuejs.org/installation.html#npm
